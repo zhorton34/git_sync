@@ -1,0 +1,28 @@
+function git_sync() {
+  local IFS=$'\n'
+  for gitFile in `git status --porcelain`; do
+    local prefix="${gitFile:0:2}"
+    local trimmedPrefix="${prefix#[[:space:]]}"
+
+    case "${trimmedPrefix:0:1}" in
+      "M" | "A" | "?")
+        echo "File to sync ${gitFile:3}"
+        ;;
+
+      "D")
+        echo "File to delete ${gitFile:3}"
+        ;;
+
+      "R")
+        local originFile=`echo -n "${gitFile}" | awk '{print $2}'`
+        local destinationFile=`echo -n "${gitFile}" | awk '{print $4}'`
+
+        echo "File to delete ${originFile}"
+        echo "File to sync ${destinationFile}"
+        ;;
+
+      *)
+        echo "¯\_(ツ)_/¯ Don't know how to handle ${gitFile}"
+    esac
+  done
+}
